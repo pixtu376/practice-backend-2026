@@ -42,15 +42,35 @@ class SurveyController extends Controller
 
         $fields = $request->validate([
             'question_text' => 'required|string',
-            'type_id' => 'required|integer|exists:answer_type,id_type'
+            'type_id' => 'required|integer|exists:answer_type,id_type',
+            'order_priority' => 'nullable|integer' // Добавили валидацию
         ]);
 
         $question = $survey->questions()->create([
             'question_text' => $fields['question_text'],
-            'type_id' => $fields['type_id']
+            'type_id' => $fields['type_id'],
+            'order_priority' => $fields['order_priority'] ?? 0
         ]);
 
         return response($question, 201);
+    }
+
+    public function changeStatus(Request $request, $id)
+    {
+        $survey = Survey::where('id_survey', $id)
+                        ->where('creator_id', auth()->id())
+                        ->firstOrFail();
+
+        $fields = $request->validate([
+            'status' => 'required|in:draft,published,closed'
+        ]);
+
+        $survey->update(['status' => $fields['status']]);
+
+        return response([
+            'message' => "Статус опроса №{$id} изменен на: " . $fields['status'],
+            'new_status' => $survey->status
+        ]);
     }
 
     public function addOption(Request $request, $questionId)

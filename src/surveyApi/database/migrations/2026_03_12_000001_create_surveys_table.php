@@ -16,6 +16,7 @@ public function up(): void
         $table->string('title');
         $table->text('description')->nullable();
         $table->foreignId('creator_id')->constrained('users', 'id');
+        $table->enum('status', ['draft', 'published', 'closed'])->default('draft'); 
         $table->timestamps();
     });
 }

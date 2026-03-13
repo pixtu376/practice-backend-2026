@@ -16,6 +16,7 @@ public function up(): void
         $table->foreignId('survey_id')->constrained('survey', 'id_survey')->onDelete('cascade');
         $table->text('question_text');
         $table->foreignId('type_id')->constrained('answer_type', 'id_type');
+        $table->integer('order_priority')->default(0);
     });
 }
 
