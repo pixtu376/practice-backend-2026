@@ -8,47 +8,19 @@
 
 Цель практики — самостоятельно спроектировать и реализовать REST API для реального сценария использования. Вы выбираете один из двух проектов, проектируете базу данных и структуру API, пишете код, тесты, документацию и упаковываете всё в Docker.
 
-**Длительность:** хтобзнал
-**Формат:** еженедельные онлайн-встречи + очные встречи раз в 2 недели
-
 ---
 
 ## Проекты
 
-| #   | Проект                                   | Описание                                                           |
-| --- | ---------------------------------------- | ------------------------------------------------------------------ |
-| 1   | [Booking API](./projects/booking-api.md) | Система бронирования ресурсов (переговорки, номера, рабочие места) |
-| 2   | [Survey API](./projects/survey-api.md)   | Сервис опросов и голосований с аналитикой результатов              |
-
-Выберите один проект и сообщите преподавателю до первой встречи.
+В ходе выполнения был выбран проект: [Survey API](./projects/survey-api.md)
 
 ---
 
-## Стек (на выбор)
+## Стек
 
-- **PHP** — Laravel
-- **Node.js** — Express.js
-- **Python** — Flask / Django
-- **Go** — Gin / Echo
+В выборе стека был выбран **PHP** — Laravel
 
-База данных: MySQL или PostgreSQL.
-
----
-
-## Чекпоинты
-
-| #   | Тема                       |
-| --- | -------------------------- |
-| 1   | Проектирование и старт     |
-| 2   | Авторизация и базовый CRUD |
-| 3   | Основная бизнес-логика     |
-| 4   | Продвинутый функционал     |
-| 5   | Тесты, Swagger, Docker     |
-| 6   | Финализация и защита       |
-
-Требования к каждому чекпоинту публикуются в начале соответствующей недели.
-
----
+База данных: MySQL
 
 ## Как работать
 
@@ -57,37 +29,81 @@
 3. На каждый чекпоинт открывайте **Merge Request** в свой форк: `dev → main`
 4. Проводится ревью и комментаруется в MR
 
-### Структура вашего репозитория
+## Создание модели
 
-```
-├── README.md          # Описание проекта, инструкция по запуску
-├── docs/
-│   └── er-diagram.png # ER-диаграмма (или ссылка на dbdiagram.io)
-├── src/               # Код приложения (структура зависит от стека)
-├── tests/             # Автотесты
-├── Dockerfile
-├── docker-compose.yml
-└── .gitignore
-```
+Используя сервис [dbdiagram.io](https://dbdiagram.io) была разработана диаграмма:
 
----
+![Диаграмма](public/image.png)
 
-## Требования к сдаче
 
-- [ ] REST API — корректные HTTP-методы и коды ответов
-- [ ] Аутентификация (JWT)
-- [ ] Валидация входных данных
-- [ ] Swagger / OpenAPI документация
-- [ ] Минимум 5 автотестов
-- [ ] Docker — проект запускается через `docker-compose up`
-- [ ] README с описанием и инструкцией по запуску
-- [ ] Осмысленная история коммитов
+Код диаграммы:
+Table users {
+  id integer [primary key]
+  username varchar
+  gmail varchar
+  pass varchar
+  role_id integer [ref: > role.id_role]
+  created_at timestamp
+}
 
----
+Table role {
+  id_role integer [primary key]
+  name_role varchar
+}
 
-## Полезные ссылки
+Table survey {
+  id_survey integer [primary key]
+  name_survey varchar
+  user_id integer [ref: > users.id]
+  status enum("draft", "published", "closed")
+  created_at timestamp
+}
 
-- [Swagger/OpenAPI](https://swagger.io/specification/)
-- [dbdiagram.io](https://dbdiagram.io) — проектирование ER-диаграмм
-- [Postman](https://www.postman.com) — тестирование API
-- [Docker — Getting Started](https://docs.docker.com/get-started/)
+Table question {
+  id_question integer [primary key]
+  survey_id integer [ref: > survey.id_survey]
+  text text
+  type_id integer [ref: > type_anwer.id_type]
+}
+
+Table type_anwer {
+  id_type integer [primary key]
+  name_type varchar
+}
+
+Table question_options {
+  id_option integer [primary key]
+  question_id integer [ref: > question.id_question]
+  option_text varchar
+}
+
+Table answer {
+  id integer [primary key]
+  id_survey integer [ref: > survey.id_survey]
+  user_id integer [ref: > users.id]
+  question_id integer [ref: > question.id_question]
+  option_id integer [ref: > question_options.id_option, null]
+  text text [null]
+  created_at timestamp
+}
+
+## Разработанные эндпоинты
+
+Были разработаны эндпоинты для:
+1) Получения данных по опросникам
+2) Вставка значений для регистрации и авторизации
+
+защищённые токеном эндпоинты: 
+1) Получения конкретных опросников
+2) Ответы
+3) Выход из сессии
+
+## Разработка моделей и мутаций
+
+Для каждой таблицы были разработаны модели, а также мутации, которые раставлены по дате в порядке создания, для создания связей
+
+## Проверка эндпоинтов
+
+Проверка была проведена в Thunder client
+
+![Проверка](public/Проверка.png)
