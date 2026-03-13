@@ -6,13 +6,13 @@
 
 ## О практике
 
-Цель практики — самостоятельно спроектировать и реализовать REST API для реального сценария использования. Вы выбираете один из двух проектов, проектируете базу данных и структуру API, пишете код, тесты, документацию и упаковываете всё в Docker.
+Цель практики — самостоятельно спроектировать и реализовать REST API для реального сценария использования. В рамках работы проектируется база данных, структура API, реализуется бизнес-логика и документация.
 
 ---
 
 ## Проекты
 
-В ходе выполнения был выбран проект: [Survey API](./projects/survey-api.md)
+В ходе выполнения был выбран проект: **[Survey API](./projects/survey-api.md)**
 
 ---
 
@@ -20,55 +20,59 @@
 
 В выборе стека был выбран **PHP** — Laravel
 
-База данных: MySQL
+* **База данных:** MySQL
+* **Инструментарий:** Postman
+* **Аутентификация:** API Token (Bearer)
+
+---
 
 ## Как работать
 
-1. **Форкните** этот репозиторий
-2. Создайте ветку `dev` — работайте в ней
-3. На каждый чекпоинт открывайте **Merge Request** в свой форк: `dev → main`
-4. Проводится ревью и комментаруется в MR
+1. **Клонируйте** этот репозиторий
+2. Настройте подключение к БД в файле `.env`
+3. Выполните миграции: `php artisan migrate`
+4. Запустите сервер: `php artisan serve`
+
+---
 
 ## Создание модели
 
-Используя сервис [dbdiagram.io](https://dbdiagram.io) была разработана диаграмма:
+Используя сервис [dbdiagram.io](https://dbdiagram.io), была разработана диаграмма:
 
 ![Диаграмма](public/image.png)
 
-
-Код диаграммы:
 Table users {
   id integer [primary key]
-  username varchar
-  gmail varchar
-  pass varchar
+  fio varchar
+  email varchar
+  password varchar
+  api_token varchar
   role_id integer [ref: > role.id_role]
-  created_at timestamp
 }
 
 Table role {
   id_role integer [primary key]
-  name_role varchar
+  name varchar
 }
 
 Table survey {
   id_survey integer [primary key]
-  name_survey varchar
-  user_id integer [ref: > users.id]
+  title varchar
+  description text
+  creator_id integer [ref: > users.id]
   status enum("draft", "published", "closed")
-  created_at timestamp
 }
 
 Table question {
   id_question integer [primary key]
   survey_id integer [ref: > survey.id_survey]
-  text text
-  type_id integer [ref: > type_anwer.id_type]
+  question_text text
+  type_id integer [ref: > answer_type.id_type]
 }
 
-Table type_anwer {
+Table answer_type {
   id_type integer [primary key]
-  name_type varchar
+  name varchar
 }
 
 Table question_options {
@@ -79,31 +83,61 @@ Table question_options {
 
 Table answer {
   id integer [primary key]
-  id_survey integer [ref: > survey.id_survey]
+  survey_id integer [ref: > survey.id_survey]
   user_id integer [ref: > users.id]
   question_id integer [ref: > question.id_question]
   option_id integer [ref: > question_options.id_option, null]
-  text text [null]
-  created_at timestamp
+  text_answer text [null]
 }
 
-## Разработанные эндпоинты
+---
 
-Были разработаны эндпоинты для:
-1) Получения данных по опросникам
-2) Вставка значений для регистрации и авторизации
+## Разработанные Эндпоинты
 
-защищённые токеном эндпоинты: 
-1) Получения конкретных опросников
-2) Ответы
-3) Выход из сессии
+Публичные эндпоинты:
 
-## Разработка моделей и мутаций
+POST /api/register — Регистрация автора
 
-Для каждой таблицы были разработаны модели, а также мутации, которые раставлены по дате в порядке создания, для создания связей
+POST /api/login — Авторизация и получение токена
+
+GET /api/surveys — Получение списка всех опросов
+
+Защищённые токеном эндпоинты:
+
+POST /api/surveys — Создание нового опроса
+
+POST /api/surveys/{id}/questions — Добавление вопросов к опросу
+
+POST /api/questions/{id}/options — Добавление вариантов ответов
+
+GET /api/surveys/{id} — Получение полной структуры конкретного опроса
+
+POST /api/logout — Выход из сессии
+
+---
+
+## Реализация моделей и связей
+
+К каждой таблице разработаны модели и их связи (один-ко-многим), особое внимание уделено валидации: реализован программный запрет на добавление вариантов ответа (options) для вопросов с типом "Текст" (type_id: 3).
+
+---
 
 ## Проверка эндпоинтов
 
-Проверка была проведена в Thunder client
+Проверка была проведена в Postman.
 
-![Проверка](public/Проверка.png)
+Проверка создания пользователя
+![Проверка](public/1.png)
+
+Проверка создания опроса
+![Проверка](public/2.png)
+
+Проверка добавления вопросов
+![Проверка](public/3.png)
+
+Проверка валидации
+![Проверка](public/4.png)
+
+
+Проверка получения данных
+![Проверка](public/5.png)

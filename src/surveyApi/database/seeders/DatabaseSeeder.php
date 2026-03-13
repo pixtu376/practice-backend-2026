@@ -2,34 +2,37 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
-{
-    \App\Models\Role::insert([
-        ['name' => 'author'],
-        ['name' => 'respondent'],
-    ]);
+    {
+        // 1. Заполняем роли
+        DB::table('role')->insertOrIgnore([
+            ['id_role' => 1, 'name' => 'author'],
+            ['id_role' => 2, 'name' => 'respondent'],
+        ]);
 
-    \App\Models\AnswerType::insert([
-        ['name' => 'radio'],
-        ['name' => 'checkbox'],
-        ['name' => 'text'],
-    ]);
+        // 2. Заполняем типы ответов
+        DB::table('answer_type')->insertOrIgnore([
+            ['id_type' => 1, 'name' => 'radio'],
+            ['id_type' => 2, 'name' => 'checkbox'],
+            ['id_type' => 3, 'name' => 'text'],
+        ]);
 
-    \App\Models\User::create([
-        'fio' => 'Создатель опросника',
-        'email' => 'opros@survey.ru',
-        'password' => bcrypt('password'),
-        'role_id' => 1,
-        'api_token' => \Illuminate\Support\Str::random(80),
-    ]);
-}
+        // 3. Создаем тестового пользователя (опционально)
+        DB::table('users')->insertOrIgnore([
+            'fio' => 'Иван Иванов',
+            'email' => 'admin@admin.com',
+            'password' => Hash::make('password'),
+            'role_id' => 1,
+            'api_token' => Str::random(80),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
 }
