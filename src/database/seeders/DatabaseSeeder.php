@@ -24,13 +24,26 @@ class DatabaseSeeder extends Seeder
             ['id_type' => 3, 'name' => 'text'],
         ]);
 
-        // 3. Создаем тестового пользователя (опционально)
+        // 3. Создаем Автора (для создания опросов)
         DB::table('users')->insertOrIgnore([
+            'id' => 1,
             'fio' => 'Иван Иванов',
             'email' => 'admin@admin.com',
             'password' => Hash::make('password'),
-            'role_id' => 1,
-            'api_token' => Str::random(80),
+            'role_id' => 1, // author
+            'api_token' => 'token_author_123', // Фиксированный токен для удобства теста
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // 4. Создаем Респондента (для прохождения опросов)
+        DB::table('users')->insertOrIgnore([
+            'id' => 2,
+            'fio' => 'Петр Петров',
+            'email' => 'user@user.com',
+            'password' => Hash::make('password'),
+            'role_id' => 2, // respondent
+            'api_token' => 'token_user_123',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
