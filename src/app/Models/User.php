@@ -34,11 +34,11 @@ class User extends Authenticatable
 
     public function isAuthor(): bool
     {
-        return $this->role_id === 1; // автор
+        return $this->role_id === 1;
     }
 
     public function isRespondent(): bool
     {
-        return $this->role_id === 2; // Читатель
+        return $this->role_id === 2;
     }
 }

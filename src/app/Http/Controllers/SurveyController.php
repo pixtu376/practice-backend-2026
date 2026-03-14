@@ -15,7 +15,6 @@ class SurveyController extends Controller
 
     public function show($id)
     {
-        // Поиск по id_survey, как в схеме БД
         return Survey::with('questions.options')->where('id_survey', $id)->firstOrFail();
     }
 
@@ -50,7 +49,6 @@ class SurveyController extends Controller
             return response()->json(['message' => 'Это не ваш опрос'], 403);
         }
 
-        // ТЗ: Запрет редактирования, если статус не "draft"
         if ($survey->status !== 'draft') {
             return response()->json([
                 'message' => 'Нельзя редактировать опрос в статусе ' . $survey->status
@@ -68,29 +66,44 @@ class SurveyController extends Controller
 
     public function changeStatus(Request $request, $id)
     {
-        $survey = Survey::where('id_survey', $id)->firstOrFail();
+        $survey = \App\Models\Survey::where('id_survey', $id)->firstOrFail();
+        $newStatus = $request->status;
 
-        if ($survey->creator_id !== auth()->id()) {
-            return response()->json(['message' => 'Это не ваш опрос'], 403);
+        $weights = [
+            'draft' => 1,
+            'published' => 2,
+            'closed' => 3
+        ];
+
+        $currentWeight = $weights[$survey->status] ?? 0;
+        $newWeight = $weights[$newStatus] ?? 0;
+
+        if ($newWeight === 0) {
+            return response()->json(['message' => 'Некорректный статус'], 422);
         }
 
-        $validated = $request->validate([
-            'status' => 'required|in:draft,published,closed'
-        ]);
+        if ($survey->status === 'closed') {
+            return response()->json(['message' => 'Нельзя менять статус архивного опроса'], 403);
+        }
 
-        $survey->update(['status' => $validated['status']]);
+        if ($newWeight < $currentWeight) {
+            return response()->json(['message' => 'Нельзя вернуть опрос на предыдущий этап'], 403);
+        }
 
-        return response()->json([
-            'message' => 'Статус успешно обновлен',
-            'survey' => $survey
-        ]);
+        if ($newWeight > $currentWeight + 1) {
+            return response()->json(['message' => 'Статусы должны меняться последовательно'], 403);
+        }
+
+        $survey->status = $newStatus;
+        $survey->save();
+
+        return response()->json(['message' => "Статус успешно изменен на {$newStatus}"]);
     }
 
     public function addQuestion(Request $request, $id)
     {
         $survey = Survey::where('id_survey', $id)->firstOrFail();
 
-        // ТЗ: Запрет изменения структуры опубликованного опроса
         if ($survey->status !== 'draft') {
             return response()->json(['message' => 'Нельзя менять структуру опубликованного опроса'], 403);
         }
