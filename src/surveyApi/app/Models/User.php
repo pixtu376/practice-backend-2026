@@ -31,4 +31,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Survey::class, 'creator_id', 'id');
     }
+
+    public function isAuthor(): bool
+    {
+        return $this->role_id === 1; // автор
+    }
+
+    public function isRespondent(): bool
+    {
+        return $this->role_id === 2; // Читатель
+    }
 }
