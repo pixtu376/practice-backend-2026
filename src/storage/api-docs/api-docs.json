@@ -1,0 +1,80 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Survey API Denis 1ISP-21",
+        "description": "Документация системы опросов для преддипломной практики",
+        "contact": {
+            "email": "admin@admin.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Основной сервер API"
+        }
+    ],
+    "paths": {
+        "/api/surveys": {
+            "get": {
+                "tags": [
+                    "Surveys"
+                ],
+                "summary": "Получение списка всех опросов",
+                "operationId": "getSurveysList",
+                "responses": {
+                    "200": {
+                        "description": "Успешная операция"
+                    },
+                    "401": {
+                        "description": "Неавторизован"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Surveys"
+                ],
+                "summary": "Создать новый опрос",
+                "operationId": "storeSurvey",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": ["title"],
+                                "properties": {
+                                    "title": { "type": "string" },
+                                    "description": { "type": "string" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": { "description": "Создано" }
+                }
+            }
+        },
+        "/api/surveys/{id}": {
+            "get": {
+                "tags": [
+                    "Surveys"
+                ],
+                "summary": "Детальная информация об опросе",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "integer" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "Успешно" },
+                    "404": { "description": "Не найдено" }
+                }
+            }
+        }
+    }
+}

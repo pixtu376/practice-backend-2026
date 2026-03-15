@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 
 class SurveyController extends Controller
 {
+    
     public function index(Request $request)
     {
         $query = Survey::with('creator:id,fio');

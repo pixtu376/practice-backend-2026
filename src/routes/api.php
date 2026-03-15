@@ -5,6 +5,27 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SurveyController;
 use App\Http\Controllers\AnswerController;
 
+/**
+ * @OA\Info(
+ * version="1.0.0",
+ * title="Survey API Denis 1ISP-21",
+ * description="Документация системы опросов для преддипломной практики",
+ * @OA\Contact(email="admin@admin.com")
+ * )
+ *
+ * @OA\Server(
+ * url="http://localhost:8000",
+ * description="Локальный сервер"
+ * )
+ *
+ * @OA\Get(
+ * path="/api/surveys",
+ * tags={"Surveys"},
+ * summary="Список всех опросов",
+ * @OA\Response(response=200, description="Успешно")
+ * )
+ */
+
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
