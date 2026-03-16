@@ -1,0 +1,49 @@
+services:
+
+# Панель управления базой данных
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: survey-phpmyadmin
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - survey-net
+  # Наше Laravel приложение
+  app:
+    build: .
+    container_name: survey-app
+    volumes:
+      - ./:/var/www
+    networks:
+      - survey-net
+
+  # Веб-сервер Nginx (вместо Apache из XAMPP)
+  nginx:
+    image: nginx:alpine
+    container_name: survey-nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www
+      - ./docker-config/nginx:/etc/nginx/conf.d
+    networks:
+      - survey-net
+
+  # База данных MySQL
+  db:
+    image: mysql:8.0
+    container_name: survey-db
+    environment:
+      MYSQL_DATABASE: survey_api
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    networks:
+      - survey-net
+
+networks:
+  survey-net:
+    driver: bridge
